@@ -33,6 +33,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   double result = 0;
+  double a = 0;
 
   TextEditingController number1 =  TextEditingController();
   TextEditingController number2 =  TextEditingController();
@@ -47,6 +48,16 @@ class _MyHomePageState extends State<MyHomePage> {
       result = double.parse(number1.text)- double.parse(number2.text);
     });
   }
+  void _calculate_com(){
+  
+    setState(() {
+      var a = double.parse(number1.text);
+      for (int i = 0; i < double.parse(number1.text); i++) {
+      a = a + i;
+    }
+    });
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,7 +96,11 @@ class _MyHomePageState extends State<MyHomePage> {
             ,child: const Text("บวก"),),
 
             FloatingActionButton(onPressed:_calculate_m
-            ,child: const Text("ลบ"),)])
+            ,child: const Text("ลบ"),),
+            
+            FloatingActionButton(onPressed:_calculate_com
+            ,child: const Text("แยกตัวประกอบ"),),
+            ])
             
           ],
         ),
