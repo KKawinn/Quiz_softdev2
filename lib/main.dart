@@ -1,111 +1,205 @@
 import 'package:flutter/material.dart';
 
+
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: GameScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class GameBoard extends StatelessWidget {
+  final List<List<String>> board;
+  final Function(int, int) onCellTap;
 
-
-
-  final String title;
+  GameBoard({required this.board, required this.onCellTap});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  Widget build(BuildContext context) {
+    return Column(
+      children: List.generate(
+        3,
+        (row) => Row(
+          children: List.generate(
+            3,
+            (col) => GestureDetector(
+              onTap: () => onCellTap(row, col),
+              child: Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black),
+                ),
+                child: Center(
+                  child: Text(
+                    board[row][col],
+                    style: TextStyle(fontSize: 24),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  double result = 0;
-  double a = 0;
+class GameScreen extends StatefulWidget {
+  @override
+  _GameScreenState createState() => _GameScreenState();
+}
 
-  TextEditingController number1 =  TextEditingController();
-  TextEditingController number2 =  TextEditingController();
+class _GameScreenState extends State<GameScreen> {
+  List<List<String>> board = List.generate(3, (_) => List.filled(3, " "));
+  String currentPlayer = "X";
 
-  void _calculate_p(){
-    setState(() {
-      result = double.parse(number1.text)+ double.parse(number2.text);
-    });
+  @override
+  void initState() {
+    super.initState();
+    
   }
-  void _calculate_m(){
-    setState(() {
-      result = double.parse(number1.text)- double.parse(number2.text);
-    });
-  }
-  void _calculate_com(){
-  
-    setState(() {
-      var a = double.parse(number1.text);
-      for (int i = 0; i < double.parse(number1.text); i++) {
-      a = a + i;
-    }
-    });
-  }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        title: Text("Tic Tac Toe"),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-             Text(
-              'กรุณาใส่เลขที่ต้องการ',
-            ), Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly,children:[
-              TextField(
-                controller : number1,
-              decoration: InputDecoration(
-                hintText: "ตัวที่ 1"
-              ),
+          children: [
+            GameBoard(
+              board: board,
+              onCellTap: (row, col) {
+                if (board[row][col] == " ") {
+                  setState(() {
+                    board[row][col] = currentPlayer;
+                    currentPlayer = (currentPlayer == "X") ? "O" : "X";
+                  });
+                  checkWinner();
+                
+                }
+              },
             ),
-            TextField(
-              controller : number2,
-              decoration: InputDecoration(
-                hintText: "ตัวที่ 2"
-              ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                resetBoard();
+              },
+              child: Text("Reset Game"),
             ),
-            ]),
-            
-            Text(
-              '$result',
-              style: Theme.of(context).textTheme.headlineMedium,
-            )
-
-            ,Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,children: <Widget>[
-            FloatingActionButton(onPressed:_calculate_p
-            ,child: const Text("บวก"),),
-
-            FloatingActionButton(onPressed:_calculate_m
-            ,child: const Text("ลบ"),),
-            
-            FloatingActionButton(onPressed:_calculate_com
-            ,child: const Text("แยกตัวประกอบ"),),
-            ])
+              
             
           ],
         ),
       ),
     );
-    
   }
+
+  void checkWinner() {
+    // Check rows and columns
+    for (int i = 0; i < 3; i++) {
+      if (board[i][0] == board[i][1] && board[i][1] == board[i][2] && board[i][0] != " ") {
+        showWinnerDialog(board[i][0]);
+        return;
+      }
+      if (board[0][i] == board[1][i] && board[1][i] == board[2][i] && board[0][i] != " ") {
+        showWinnerDialog(board[0][i]);
+        return;
+      }
+    }
+
+    // Check diagonals
+    if (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[0][0] != " ") {
+      showWinnerDialog(board[0][0]);
+      return;
+    }
+    if (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[0][2] != " ") {
+      showWinnerDialog(board[0][2]);
+      return;
+    }
+
+    // Check for a tie
+    if (!board.any((row) => row.contains(" "))) {
+      showWinnerDialog("Tie");
+    }
+  }
+
+  void checktest() {
+    
+    for (int i = 0; i < 3; i++) {
+      if (board[i][0] != '' && board[i][1] != '' ) {
+        reboard(i);
+        return;
+      }
+      if (board[0][i] == board[1][i] && board[1][i] == board[2][i] && board[0][i] != " ") {
+        showWinnerDialog(board[0][i]);
+        return;
+      }
+    }
+
+    // Check diagonals
+    if (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[0][0] != " ") {
+      showWinnerDialog(board[0][0]);
+      return;
+    }
+    if (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[0][2] != " ") {
+      showWinnerDialog(board[0][2]);
+      return;
+    }
+
+    // Check for a tie
+    if (!board.any((row) => row.contains(" "))) {
+      showWinnerDialog("Tie");
+    }
+  }
+
+  void reboard(pos1  pos2){ 
+
+
+
+  }
+  void showWinnerDialog(String winner) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Game Over"),
+          content: Text(winner == "Tie" ? "It's a Tie!" : "Player $winner wins!"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                resetBoard();
+              },
+              child: Text("Play Again"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("Close"),
+            ),
+          ],
+        );
+      },
+    ); // Save the game when it's over
+  }
+
+  void resetBoard() {
+    setState(() {
+      board = List.generate(3, (_) => List.filled(3, " "));
+      currentPlayer = "X";
+    });
+  }
+
+  
 }
