@@ -23,6 +23,8 @@ class _TicTacToeState extends State<TicTacToe> {
   late String _currentPlayer;
   late bool _gameOver;
   late String? _winner;
+  late int turn;
+  late List<int> playermove ;
 
   @override
   void initState() {
@@ -32,16 +34,21 @@ class _TicTacToeState extends State<TicTacToe> {
 
   void _initializeBoard() {
     _board = List.generate(3, (_) => List.filled(3, ''));
+    playermove = List.generate(30, (index) => 0);
     _currentPlayer = 'X';
     _gameOver = false;
     _winner = null;
+    turn = 0;
   }
 
   void _makeMove(int row, int col) {
     if (_board[row][col] == '' && !_gameOver) {
       setState(() {
+        turn = turn + 1;
         _board[row][col] = _currentPlayer;
-        checkTest();
+        playermove[turn*2] = row;
+        playermove[(turn*2)-1] = col;
+        // checkTest();
         _checkWinner();
         _togglePlayer();
       });
@@ -89,27 +96,34 @@ class _TicTacToeState extends State<TicTacToe> {
       _endGame(null); // Draw
     }
   }
-  void checkTest() {
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 2; j++) {
-        if (_board[i][j + 1] != '' && _board[i][j] != '') {
-          reboard(i, j, i, j + 1);
-        }
-      }
-    }
-    for (int i = 0; i < 2; i++) {
-      for (int j = 0; j < 3; j++) {
-        if (_board[i + 1][j] != '' && _board[i][j] != '') {
-          reboard(i, j, i + 1, j);
-        }
-      }
-    }
+  void undo(){
+
+    reboard(playermove[turn*2],playermove[(turn*2)-1]);
+    turn = turn -1;
   }
+ 
+
+  // void checkTest() {
+  //   for (int i = 0; i < 3; i++) {
+  //     for (int j = 0; j < 2; j++) {
+  //       if (_board[i][j + 1] != '' && _board[i][j] != '') {
+  //         reboard(i, j, i, j + 1);
+  //       }
+  //     }
+  //   }
+  //   for (int i = 0; i < 2; i++) {
+  //     for (int j = 0; j < 3; j++) {
+  //       if (_board[i + 1][j] != '' && _board[i][j] != '') {
+  //         reboard(i, j, i + 1, j);
+  //       }
+  //     }
+  //   }
+  // }
   
-   void reboard(int row1, int col1, int row2, int col2) {
+   void reboard(int row1, int col1) {
     setState(() {
       _board[row1][col1] = '';
-      _board[row2][col2] = '';
+      
     });
   }
 
@@ -193,6 +207,11 @@ class _TicTacToeState extends State<TicTacToe> {
               onPressed: _restartGame,
               child: Text('Restart Game'),
             ),
+            ElevatedButton(
+              onPressed: undo,
+              child: Text('Undo'),
+            ),
+            
             
           ],
         ),
