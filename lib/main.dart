@@ -34,7 +34,7 @@ class _TicTacToeState extends State<TicTacToe> {
 
   void _initializeBoard() {
     _board = List.generate(3, (_) => List.filled(3, ''));
-    playermove = List.generate(30, (index) => 0);
+    playermove = List.generate(36, (index) => 0);
     _currentPlayer = 'X';
     _gameOver = false;
     _winner = null;
@@ -101,6 +101,15 @@ class _TicTacToeState extends State<TicTacToe> {
     reboard(playermove[turn*2],playermove[(turn*2)-1]);
     turn = turn -1;
   }
+
+  void redo(){
+    if (turn%2 == 0){
+      reboard2(playermove[turn*2],playermove[(turn*2)-1],"X");
+    }else{
+      reboard2(playermove[turn*2],playermove[(turn*2)-1],"O");
+    }
+    turn = turn + 1;
+  }
  
 
   // void checkTest() {
@@ -123,6 +132,12 @@ class _TicTacToeState extends State<TicTacToe> {
    void reboard(int row1, int col1) {
     setState(() {
       _board[row1][col1] = '';
+      
+    });
+  }
+  void reboard2(int row1, int col1,String player) {
+    setState(() {
+      _board[row1][col1] = player;
       
     });
   }
@@ -210,6 +225,10 @@ class _TicTacToeState extends State<TicTacToe> {
             ElevatedButton(
               onPressed: undo,
               child: Text('Undo'),
+            ),
+            ElevatedButton(
+              onPressed: redo,
+              child: Text('Redo'),
             ),
             
             
