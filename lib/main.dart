@@ -24,17 +24,20 @@ class _TicTacToeState extends State<TicTacToe> {
   late bool _gameOver;
   late String? _winner;
   late int turn;
-  late List<int> playermove ;
+  late List<List<String>> moveHistory;
+  late List<List<String>> redoHistory;
 
   @override
   void initState() {
     super.initState();
     _initializeBoard();
+    moveHistory = [];
+    redoHistory = [];
   }
 
   void _initializeBoard() {
     _board = List.generate(3, (_) => List.filled(3, ''));
-    playermove = List.generate(36, (index) => 0);
+
     _currentPlayer = 'X';
     _gameOver = false;
     _winner = null;
@@ -46,11 +49,10 @@ class _TicTacToeState extends State<TicTacToe> {
       setState(() {
         turn = turn + 1;
         _board[row][col] = _currentPlayer;
-        playermove[turn*2] = row;
-        playermove[(turn*2)-1] = col;
         // checkTest();
         _checkWinner();
         _togglePlayer();
+        moveHistory.add([row.toString(), col.toString(), _currentPlayer]);
       });
     }
   }
@@ -96,21 +98,35 @@ class _TicTacToeState extends State<TicTacToe> {
       _endGame(null); // Draw
     }
   }
-  void undo(){
 
-    reboard(playermove[turn*2],playermove[(turn*2)-1]);
-    turn = turn -1;
-  }
-
-  void redo(){
-    if (turn%2 == 0){
-      reboard2(playermove[turn*2],playermove[(turn*2)-1],"X");
-    }else{
-      reboard2(playermove[turn*2],playermove[(turn*2)-1],"O");
+  void undo() {
+    if (turn > 0) {
+      setState(() {
+        turn = turn - 1;
+        List<String> lastMove = moveHistory.removeLast();
+        int row = int.parse(lastMove[0]);
+        int col = int.parse(lastMove[1]);
+        _board[row][col] = '';
+        _togglePlayer();
+        redoHistory.add([row.toString(), col.toString(), _currentPlayer]);
+      });
     }
-    turn = turn + 1;
   }
- 
+
+  void redo() {
+    if (redoHistory.isNotEmpty) {
+      setState(() {
+        turn = turn + 1;
+        List<String> nextMove = redoHistory.removeLast();
+        int row = int.parse(nextMove[0]);
+        int col = int.parse(nextMove[1]);
+        String player = nextMove[2];
+        _board[row][col] = player;
+        _togglePlayer();
+        moveHistory.add([row.toString(), col.toString(), _currentPlayer]);
+      });
+    }
+  }
 
   // void checkTest() {
   //   for (int i = 0; i < 3; i++) {
@@ -128,30 +144,30 @@ class _TicTacToeState extends State<TicTacToe> {
   //     }
   //   }
   // }
-  
-   void reboard(int row1, int col1) {
-    setState(() {
-      _board[row1][col1] = '';
-      
-    });
-  }
-  void reboard2(int row1, int col1,String player) {
-    setState(() {
-      _board[row1][col1] = player;
-      
-    });
-  }
+
+  // void reboard(int row1, int col1) {
+  //   setState(() {
+  //     _board[row1][col1] = '';
+  //   });
+  // }
+
+  // void reboard2(int row1, int col1, String player) {
+  //   setState(() {
+  //     _board[row1][col1] = player;
+  //   });
+  // }
 
   void _endGame(String? winner) {
-  setState(() {
-    _gameOver = true;
-    _winner = winner;
-  });
-}
+    setState(() {
+      _gameOver = true;
+      _winner = winner;
+    });
+  }
 
   void _restartGame() {
     setState(() {
       _initializeBoard();
+      moveHistory.clear();
     });
   }
 
@@ -230,8 +246,6 @@ class _TicTacToeState extends State<TicTacToe> {
               onPressed: redo,
               child: Text('Redo'),
             ),
-            
-            
           ],
         ),
       ),
