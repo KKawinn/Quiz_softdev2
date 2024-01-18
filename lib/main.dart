@@ -53,6 +53,7 @@ class _TicTacToeState extends State<TicTacToe> {
         _checkWinner();
         _togglePlayer();
         moveHistory.add([row.toString(), col.toString(), _currentPlayer]);
+        redoHistory.clear();
       });
     }
   }
